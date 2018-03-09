@@ -7,14 +7,7 @@
 #include <netinet/in.h>
 
 
-struct sockaddr_in addr = {
-  .sin_addr.s_addr = INADDR_ANY,
-  .sin_family = AF_INET,
-  .sin_port = htons(4444)
-};
-
-
-void main()  {
+int main()  {
 
   int s = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -37,7 +30,6 @@ void main()  {
     perror("listen failed");
     exit(2);
   }
-
 
   struct sockaddr_in client_addr;
   socklen_t client_addr_length = sizeof(struct sockaddr_in);
