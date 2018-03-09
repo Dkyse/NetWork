@@ -6,40 +6,52 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+
 struct sockaddr_in addr = {
+  .sin_addr.s_addr = INADDR_ANY,
   .sin_family = AF_INET,
   .sin_port = htons(4444)
 };
 
+
 void main()  {
 
-  struct hostent* server = gethostbyname(argv[1]);
-  if(server == NULL) {
-    fprintf(stderr, "Unable to find host %s\n", argv[1]);
-    exit(1);
-  }
-
   int s = socket(AF_INET, SOCK_STREAM, 0);
+
   if(s == -1) {
     perror("socket failed");
     exit(2);
   }
 
-  bcopy((char*)server->h_addr, (char*)&addr.sin_addr.s_addr, server->h_length);
+  struct sockaddr_in addr;
+  addr.sin_addr.s_addr = INADDR_ANY;
+  addr.sin_family = AF_INET;
+  addr.sin_port = htons(4444);
 
-  if(connect(s, (struct sockaddr*)&addr, sizeof(struct sockaddr_in))) {
-    perror("connect failed");
+  if(bind(s, (struct sockaddr*)&addr, sizeof(struct sockaddr_in))) {
+    perror("bind failed");
     exit(2);
   }
 
-  char buffer[256];
-  int bytes_read = read(s, buffer, 256);
-  if(bytes < 0) {
-    perror("read failed");
+  if(listen(s, 2)) {
+    perror("listen failed");
     exit(2);
   }
 
-  printf("Server sent: %s\n", buffer);
 
+  struct sockaddr_in client_addr;
+  socklen_t client_addr_length = sizeof(struct sockaddr_in);
+  int client_socket = accept(s, (struct sockaddr*)&client_addr, &client_addr_length);
+
+  if(client_socket == -1) {
+    perror("accept failed");
+    exit(2);
+  }
+
+  char* msg = "Hello client.\n";
+  write(client_socket, msg, strlen(msg));
+
+  close(client_socket);
   close(s);
+
 }
