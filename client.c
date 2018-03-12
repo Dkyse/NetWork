@@ -7,7 +7,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
-int main ()  {
+int main (int argc, char** argv)  {
 
   struct hostent* server = gethostbyname(argv[1]);
   if(server == NULL) {
@@ -21,12 +21,28 @@ int main ()  {
     exit(2);
   }
 
+  struct sockaddr_in addr = {
+    .sin_family = AF_INET,
+    .sin_port = htons(4444)
+  };
+
   bcopy((char*)server->h_addr, (char*)&addr.sin_addr.s_addr, server->h_length);
 
   if(connect(s, (struct sockaddr*)&addr, sizeof(struct sockaddr_in))) {
     perror("connect failed");
     exit(2);
   }
+
+
+    char* msg = "a";
+      msg[0] = getchar();
+      while(msg != "\n"){
+        write(server_socket, msg, 0);
+        msg[0] = getchar();
+      }
+
+    free(msg);
+
 
   char buffer[256];
   int bytes_read = read(s, buffer, 256);
@@ -36,6 +52,7 @@ int main ()  {
   }
 
   printf("Server sent: %s\n", buffer);
+
 
   close(s);
 

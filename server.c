@@ -40,8 +40,21 @@ int main()  {
     exit(2);
   }
 
+
+  char buffer[256];
+  int bytes_read = read(s, buffer, 256);
+  if(bytes_read < 0) {
+    perror("read failed");
+    exit(2);
+  }
+
+  printf("Client sent: %s\n", buffer);
+
+
   char* msg = "Hello client.\n";
   write(client_socket, msg, strlen(msg));
+
+
 
   close(client_socket);
   close(s);
